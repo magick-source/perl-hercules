@@ -47,6 +47,45 @@ sub index {
       push @ginfo, $rec;
   }
 
+  if ($group_stats{''}) {
+    my $last_run = 0;
+    my $next_run = undef;
+    for my $status (keys %{ $group_stats{''} }) {
+      for my $runnable (keys %{ $group_stats{''}{ $status } }) {
+        $last_run = $group_stats{''}{$status}{$runnable}{last_run}
+          if  $group_stats{''}{$status}{$runnable}{last_run} > $last_run;
+
+        $next_run = $group_stats{''}{$status}{$runnable}{next_run}
+          if !$next_run
+            or $group_stats{''}{$status}{$runnable}{next_run} < $next_run;
+      }
+    }
+    
+    my $runnable_jobs
+      = $group_stats{''}->{ active }->{ 1 }->{ count } // 0;
+    my $failing_jobs
+      = $group_stats{''}->{ failing }->{ 1 }->{ count } // 0;
+
+    push @ginfo, {
+        name              => '',
+        server            => '*',
+        elected           => '',
+        reelect           => '',
+        elected_dt        => '',
+        reelect_dt        => '',
+        last_job_start    => $last_run,
+        last_job_start_dt => epoch_to_datetime( $last_run ),
+        next_job_start    => $next_run,
+        next_job_start_dt => epoch_to_datetime( $next_run ),
+        runnable_jobs     => $runnable_jobs,
+        failing_jobs      => $failing_jobs,
+      };
+  }
+
+  @ginfo = sort {
+          $b->{runnable_jobs}   <=> $a->{runnable_jobs}
+      ||  $b->{next_job_start}  <=> $a->{next_job_start}
+    } @ginfo;
 
   $stash->{debug_dump} = Dumper(\@ginfo);
 

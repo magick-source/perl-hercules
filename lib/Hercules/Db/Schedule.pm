@@ -54,7 +54,9 @@ __PACKAGE__->set_sql(next_run => q{
 __PACKAGE__->set_sql(group_stats => q{
   SELECT cron_group, flags,
       if(next_run_epoch<UNIX_TIMESTAMP(),1,0) runnable,
-      min(next_run_epoch) min_next_run, count(*) cnt
+      min(next_run_epoch) min_next_run,
+      max(last_run_ok_epoch) max_last_run,
+      count(*) cnt
     FROM cronjob
     GROUP BY cron_group, flags, runnable
 });
@@ -226,13 +228,17 @@ sub group_stats {
   $sth->execute();
   
   my %stats;
-  $sth->bind_columns(\my ($group, $flags,$runnable, $next_run, $count));
+  $sth->bind_columns(\my (
+        $group, $flags, $runnable,
+        $next_run, $last_run, $count
+    ));
   while ( $sth->fetch() ) {
     $stats{ $group//'' }{ $flags }{ $runnable } = {
         group     => $group,
         flags     => $flags,
         runnable  => $runnable,
         next_run  => $next_run,
+        last_run  => $last_run,
         count     => $count,
       };
   }
