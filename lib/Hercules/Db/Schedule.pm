@@ -51,6 +51,14 @@ __PACKAGE__->set_sql(next_run => q{
       AND flags LIKE '%%active%%'
 });
 
+__PACKAGE__->set_sql(group_stats => q{
+  SELECT cron_group, flags,
+      if(next_run_epoch<UNIX_TIMESTAMP(),1,0) runnable,
+      min(next_run_epoch) min_next_run, count(*) cnt
+    FROM cronjob
+    GROUP BY cron_group, flags, runnable
+});
+
 __PACKAGE__->has_a(params => 'Hercules::Params',
     inflate => sub { 
       my $res;
@@ -209,6 +217,27 @@ sub _set_run_next {
   }
 
   return;
+}
+
+sub group_stats {
+  my ($class) = @_;
+
+  my $sth = $class->sql_group_stats();
+  $sth->execute();
+  
+  my %stats;
+  $sth->bind_columns(\my ($group, $flags,$runnable, $next_run, $count));
+  while ( $sth->fetch() ) {
+    $stats{ $group//'' }{ $flags }{ $runnable } = {
+        group     => $group,
+        flags     => $flags,
+        runnable  => $runnable,
+        next_run  => $next_run,
+        count     => $count,
+      };
+  }
+
+  return wantarray ? %stats : \%stats;
 }
 
 1;
