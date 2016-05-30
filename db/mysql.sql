@@ -10,6 +10,7 @@ CREATE TABLE `cronjob` (
   `last_run_ok_epoch` int(10) unsigned NOT NULL DEFAULT '0',
   `error_cnt` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `running_until_epoch` int(10) unsigned NOT NULL DEFAULT '0',
+  `running_server` varchar(128) NOT NULL DEFAULT '',
   `next_run_epoch` int(10) unsigned NOT NULL DEFAULT '0',
   `max_run_time` int(10) unsigned NOT NULL DEFAULT '0',
   `flags` set('active','unscheduled','failing') DEFAULT NULL,

@@ -1,0 +1,47 @@
+.jobtag {
+  margin:   2px;
+  padding:  4px;
+  border-radius: 3px;
+  border: 1px solid grey;
+  display: inline-block;
+}
+.jobtag a {
+  text-decoration: none;
+}
+.jobtag-ok a:hover {
+  text-decoration: underline;
+}
+
+.jobtag-ok {
+  background-color: #dff0d8;
+  border-color: #5cb85c;
+  color: #5cb85c;
+}
+.jobtag-ok a {
+  color: #5cb85c;
+}
+.jobtag-running {
+  background-color: #d9edf7;
+  border-color: #337ab7;
+  color: #337ab7; 
+}
+.jobtag-running a {
+  color: #337ab7; 
+}
+.jobtag-delayed {
+  background-color: #fcf8e3;
+  border-color: #f0ad4e;
+  color: #f0ad4e;
+}
+.jobtag-delayed a {
+  color: #f0ad4e;
+}
+.jobtag-failing {
+  background-color: #f2dede;
+  border-color: #d9534f;
+  color: #d9534f;
+}
+.jobtag-failing a {
+  color: #d9534f;
+}
+

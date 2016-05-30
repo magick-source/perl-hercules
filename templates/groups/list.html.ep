@@ -1,0 +1,78 @@
+% layout 'admin', title => $title || 'List';
+
+<div class="row">
+  <div class="col-lg-12">
+    <h1 class='page-header'> Groups - list</h1>
+  </div>
+</div>
+
+<div class="row">
+
+  <div class="col-lg-12">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        Groups
+      </div>
+      <div class="panel-body">
+        <div class="row">
+          <div class="col-lg-12">
+            <form method="get">
+              <div class="input-group custom-search-form">
+                <input type="text"
+                    name="search"
+                    value="<%== $search %>"
+                    class="form-control"
+                    placeholder="Search...">
+                <span class="input-group-btn">
+                <button class="btn btn-default" type="button">
+                  <i class="fa fa-search"></i>
+                </button>
+              </div>
+            </form>
+          </div>    
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Parallel Jobs</th>
+                <th>Last Run</th>
+                <th>Next Run</th>
+                <th>Jobs</th>
+                <th>Server Name</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+% for my $group (@$groups) {
+              <tr>
+                <th><%= $group->{group_name} %></th>
+                <td><%= $group->{max_parallel_jobs} %></td>
+                <td><%= $group->{last_run_tu} %></td>
+                <td><%= $group->{next_run_tu} %></td>
+                <td>
+%   for my $job (@{ $group->{jobs} }) {
+                    <span class="jobtag jobtag-<%= $job->{status} %>">
+                      <a href="/job/<%= $job->{name} %>">
+                        <i class="fa fa-<%= $job->{icon} %> fa-fw"></i>
+                        <%= $job->{name} %>
+                      </a>
+                    </span>
+%   }
+                </td>
+                <td><%= $group->{server_name} %></td>
+                <td>
+                  <!-- group options will be here! -->
+                </td>
+              </tr>
+% }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+

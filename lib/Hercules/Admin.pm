@@ -14,11 +14,13 @@ sub startup {
   $self->defaults->{site_title} = $self->sitetitle;
   $self->defaults->{title} = '';
   $self->defaults->{debug_dump} = '';
+  $self->defaults->{hercules_version} = $Hercules::Config::VERSION;
 
   my $r = $self->routes;
 
   $r->route('/')->to('dashboard#index');
 
+  $r->route('/groups/')->to('groups#list');
 }
 
 1;

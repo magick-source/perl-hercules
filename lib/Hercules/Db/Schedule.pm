@@ -16,7 +16,17 @@ __PACKAGE__->table('cronjob');
 
 __PACKAGE__->columns( Primary => 'id' );
 
-__PACKAGE__->columns( ALL => qw(
+__PACKAGE__->columns( Essential => qw(
+  id
+  name
+  last_run_ok_epoch
+  running_until_epoch
+  running_server
+  next_run_epoch
+  flags
+));
+
+__PACKAGE__->columns( All => qw(
   id
   name
   cron_group
@@ -28,6 +38,7 @@ __PACKAGE__->columns( ALL => qw(
   last_run_ok_epoch
   error_cnt
   running_until_epoch
+  running_server
   next_run_epoch
   max_run_time
   flags
@@ -53,12 +64,27 @@ __PACKAGE__->set_sql(next_run => q{
 
 __PACKAGE__->set_sql(group_stats => q{
   SELECT cron_group, flags,
-      if(next_run_epoch<UNIX_TIMESTAMP(),1,0) runnable,
-      min(next_run_epoch) min_next_run,
+      IF(running_until_epoch<UNIX_TIMESTAMP()
+          AND next_run_epoch<( UNIX_TIMESTAMP() - 10)
+        ,1 ,0) runnable,
+      min(
+        IF(running_until_epoch<UNIX_TIMESTAMP(),
+          next_run_epoch,
+          running_until_epoch  
+        )
+      ) min_next_run,
       max(last_run_ok_epoch) max_last_run,
       count(*) cnt
     FROM cronjob
     GROUP BY cron_group, flags, runnable
+});
+
+__PACKAGE__->set_sql(last_run_by_status => q{
+  SELECT *
+    FROM __TABLE__
+    WHERE flags LIKE '%%%s%%'
+    ORDER by last_run_ok_epoch DESC
+    LIMIT %d
 });
 
 __PACKAGE__->has_a(params => 'Hercules::Params',
@@ -111,6 +137,7 @@ sub get_runnable {
       $run_until += 24 * 60 * 60;
     }
 
+    $obj->running_server( hostname );
     $obj->running_until_epoch( $run_until );
     $obj->update;
   }
@@ -244,6 +271,44 @@ sub group_stats {
   }
 
   return wantarray ? %stats : \%stats;
+}
+
+sub last_jobs_by_status {
+  my ($class, $status, $count) = @_;
+  
+  $count  ||= 10;
+  $status ||= '%';
+
+  my $sth = $class->sql_last_run_by_status(
+      $status, $count
+    );
+
+  return $class->sth_to_objects( $sth );
+}
+
+sub jobs_for_group {
+  my ($class, $group) =@_;
+
+  return $class->search(
+      cron_group => $group,
+      { columns => [ qw(id name next_run_epoch running_until_epoch flags) ],
+        order_by  => 'next_run_epoch ASC',
+      }
+    );
+}
+
+sub status {
+  my ($self) = @_;
+
+  my $status = $self->flags =~ m{failing}
+      ? 'failing'
+      : $self->running_until_epoch > time
+        ? 'running'
+        : $self->next_run_epoch > time
+          ? 'ok'
+          : 'delayed';
+
+  return $status;
 }
 
 1;

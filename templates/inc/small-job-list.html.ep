@@ -1,0 +1,39 @@
+<div class="col-lg-6">
+  <div class="panel panel-<%= $class %>">
+    <div class="panel-heading">
+      <i class="fa fa-<%= $icon %> fa-fw"></i>
+      <%= $title %>
+    </div>
+    <div class="panel-body">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>name</th>
+              <th>Last Run</th>
+              <th>Next Run</th>
+              <th>Server</th>
+            </tr>
+          </thead>
+          <tbody>
+% for my $job (@$jobs) {
+            <tr>
+              <th><%= $job->{name} %> </th>
+              <td><%= $job->{last_run_tu} %></td>
+              <td><%= $job->{next_run_tu} %></td>
+              <td><%= $job->{running_server} %></td>
+            </tr>
+% }
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <a href="/groups.html">
+      <div class="panel-footer">
+        <span class="pull-left">Manage Jobs</span>
+        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+        <div class="clearfix"></div>
+      </div>
+    </a>
+  </div>
+</div>

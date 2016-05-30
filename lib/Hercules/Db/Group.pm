@@ -31,6 +31,14 @@ SELECT * FROM __TABLE__
   LIMIT 1
 });
 
+__PACKAGE__->set_sql(list => q{
+SELECT * FROM __TABLE__
+  WHERE group_name like ?
+    AND group_name >= ?
+ ORDER BY group_name
+ LIMIT 50
+});
+
 sub elect_group {
   my ($class) = @_;
 
@@ -77,6 +85,23 @@ sub running_job {
   $self->update;
 
   return;
+}
+
+sub list_groups_like {
+  my ($class, $search, $after) = @_;
+
+  $search ||= '%';
+
+  my $sth = $class->sql_list();
+  $sth->execute( "%$search%", $after );
+
+  return $class->sth_to_objects( $sth );
+}
+
+sub get_jobs {
+  my ($self) = @_;
+  
+  return Hercules::Db::Schedule->jobs_for_group( $self->group_name );
 }
 
 1;

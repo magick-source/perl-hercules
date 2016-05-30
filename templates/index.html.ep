@@ -1,17 +1,81 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Hercules Admin">
-    <title>Hercules Admin</title>
-  </head>
-  <body>
+% layout 'admin', title => 'Dashboard';
+        
+<div class="row">
+  <div class="col-lg-12">
+    <h1 class="page-header"> Dashboard</h1>
+  </div>
+</div>
 
-<pre>
-<%= $debug_dump %>
-</pre>
 
-  </body>
-</html>
+<div class="row">
+
+<%= include 'inc/dashlet',
+      title => 'Active Jobs',
+      icon => 'cog', 
+      class => 'panel-primary',
+      value => $counters->{jobs_active},
+      link  => '/jobs/?status=active',
+%>
+
+<%= include 'inc/dashlet',
+      title => 'Runned Jobs',
+      icon => 'check', 
+      class => 'panel-green',
+      value => $counters->{jobs_ok},
+      link  => '/jobs/?status=ok',
+%>
+
+<%= include 'inc/dashlet',
+      title => 'Delayed Jobs',
+      icon => 'exclamation-circle', 
+      class => $counters->{jobs_behind} ? 'panel-yellow' : 'panel-green',
+      value => $counters->{jobs_behind},
+      link  => '/jobs/?status=behind',
+%>
+% my $color = $counters->{max_late} > 3600
+%   ? 'red' : $counters->{max_late} > 30 ? 'yellow' : 'green';
+<%= include 'inc/dashlet',
+      title => $counters->{max_late}>0 ? 'Time Behind' : 'Next start in',
+      icon => 'clock-o', 
+      class => "panel-$color",
+      value => $counters->{max_late_time},
+      link  => '/jobs/?status=behind',
+%>
+
+
+<%= include 'inc/dashlet',
+      title => 'Failed Jobs',
+      icon => 'times', 
+      class => 'panel-red',
+      value => $counters->{jobs_failed},
+      link  => '/jobs/?status=failed',
+%>
+
+<%= include 'inc/dashlet',
+      title => 'Job Groups',
+      icon => 'cogs', 
+      class => 'panel-primary',
+      value => $counters->{job_groups},
+      link  => '/groups/',
+%>
+
+</div>
+
+<div class="row">
+
+<%= include 'inc/small-group-list' %>
+<%= include 'inc/small-job-list',
+      jobs  => $last_failed,
+      class => 'red',
+      title => 'Last Failed Jobs',
+      icon  => 'times',
+%>
+
+<%= include 'inc/small-job-list',
+      jobs  => $last_runned,
+      class => 'green',
+      title => 'Last Runned Jobs',
+      icon  => 'check',
+%>
+
+</div>

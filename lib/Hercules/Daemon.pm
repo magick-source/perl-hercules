@@ -109,7 +109,7 @@ sub pre_fork {
   my $cron = Hercules::Db::Schedule->get_runnable(1, @gnames);
   $self->{cron} = $cron;
 
-  if ( my $gname = $cron->cron_group() ) {
+  if ( $cron and my $gname = $cron->cron_group() ) {
     my ($group) = grep {
         $_->group_name eq $gname
       } @{ $self->{__cron_groups} };
