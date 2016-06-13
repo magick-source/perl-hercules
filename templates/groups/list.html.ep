@@ -20,7 +20,7 @@
               <div class="input-group custom-search-form">
                 <input type="text"
                     name="search"
-                    value="<%== $search %>"
+                    value="<%== $search//'' %>"
                     class="form-control"
                     placeholder="Search...">
                 <span class="input-group-btn">
@@ -45,7 +45,7 @@
               </tr>
             </thead>
             <tbody>
-% for my $group (@$groups) {
+% for my $group ( @$groups ) {
               <tr>
                 <th><%= $group->{group_name} %></th>
                 <td><%= $group->{max_parallel_jobs} %></td>
@@ -55,7 +55,7 @@
 %   for my $job (@{ $group->{jobs} }) {
                     <span class="jobtag jobtag-<%= $job->{status} %>">
                       <a href="/job/<%= $job->{name} %>">
-                        <i class="fa fa-<%= $job->{icon} %> fa-fw"></i>
+                        <i class="fa fa-<%= $job->{icon} %> fa-fw"> </i>
                         <%= $job->{name} %>
                       </a>
                     </span>
@@ -63,6 +63,16 @@
                 </td>
                 <td><%= $group->{server_name} %></td>
                 <td>
+                  <button type="button"
+                      id="elect-group-<%= $group->{group_name} %>"
+                      class="btn btn-warning btn-circle btn-elect-group">
+                    <i class="fa fa-unlink"> </i>
+                  </button>
+                  <button type="button"
+                      id="edit-group-<%= $group->{group_name} %>"
+                      class="btn btn-danger btn-circle btn-edit-group">
+                    <i class="fa fa-edit"> </i>
+                  </button>
                   <!-- group options will be here! -->
                 </td>
               </tr>
@@ -76,3 +86,6 @@
 
 </div>
 
+<%= include 'groups/inc/relect-dialog' %>
+
+<%= include 'groups/inc/edit-group' %>

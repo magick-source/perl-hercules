@@ -21,6 +21,8 @@ sub startup {
   $r->route('/')->to('dashboard#index');
 
   $r->route('/groups/')->to('groups#list');
+  $r->route('/group/:group/reelect')->to('groups#reelect');
+  $r->route('/group/:group/rename')->to('groups#rename');
 }
 
 1;

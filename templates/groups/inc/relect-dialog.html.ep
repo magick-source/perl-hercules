@@ -1,0 +1,26 @@
+<div class="modal fade" id="relect-confirm" tabindex="-1" role="dialog" aria-labelledby="relect-confirmLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" id="relect-confirmLabel">reElect Group
+					'<span class="group-name"></span>'
+				</h4>
+      </div>
+      <div class="modal-body">
+				This will start the process of chosing the server where
+				the jobs of this group (<span class='group-name'></span>)
+				 run - this may result in some jobs
+				running more than once.
+      </div>
+      <div class="modal-footer">
+        <input type="hidden" value="" id='group-to-reelect'/>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary">Proceed</button>
+      </div>
+    </div>
+  </div>
+</div>
+

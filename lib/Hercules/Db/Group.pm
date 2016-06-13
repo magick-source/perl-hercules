@@ -61,6 +61,16 @@ sub elect_group {
   return $group;
 }
 
+sub make_electable {
+  my ($self) = @_;
+
+  $self->re_elect_epoch( time );
+  $self->server_name('');
+  $self->update();
+
+  return;
+}
+
 sub get_my_groups {
   my ($class) = @_;
 
@@ -102,6 +112,28 @@ sub get_jobs {
   my ($self) = @_;
   
   return Hercules::Db::Schedule->jobs_for_group( $self->group_name );
+}
+
+sub rename {
+  my ($self, $new_name) = @_;
+
+
+  print STDERR "'$new_name' doesn't match\n"
+    unless $new_name =~ m{\A\w[\w\-_]*\w\z};
+
+  return unless $new_name =~ m{\A\w[\w\-_]*\w\z};
+
+  my @jobs = $self->get_jobs();
+  $self->copy( $new_name );
+
+  for my $job (@jobs) {
+    $job->cron_group( $new_name );
+    $job->update;
+  }
+
+  $self->delete;
+
+  return;
 }
 
 1;

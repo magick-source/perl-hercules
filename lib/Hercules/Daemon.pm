@@ -43,7 +43,8 @@ sub need_childs {
     $count = Hercules::Db::Schedule->count_runnable( @gnames );
     $next_count_epoch = time + 10;
     $count_groups     = $gnames;
-    print STDERR "$$: have $count runnable crons\n";
+    print STDERR "$$: have $count runnable crons\n"
+      if $count;
   }
   if ($count > 0) {
     $needed++;
@@ -143,11 +144,17 @@ sub post_child_exit {
   print "$$: A child Ended\n";
   my $log;
   {
-    my $child_log = $self->{tmpdir}."/$child->{pid}.out";
+    my $child_pid = $child->{pid};
+    my $child_log = $self->{tmpdir}."/$child_pid.out";
     open my $fh, '<', $child_log;
+    my $printed_head = 0;
     while (my $ln = <$fh>) {
+      unless ($printed_head) {
+        print STDERR "$child_pid>>> output of '$cron->{name}'\n";
+        $printed_head++;
+      }
       $log .= $ln;
-      print STDERR ">>> $ln";
+      print STDERR "$child_pid>>> $ln";
     }
     close $fh;
     unlink $child_log;
