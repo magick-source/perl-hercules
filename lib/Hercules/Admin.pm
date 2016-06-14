@@ -20,9 +20,14 @@ sub startup {
 
   $r->route('/')->to('dashboard#index');
 
+  # groups
   $r->route('/groups/')->to('groups#list');
   $r->route('/group/:group/reelect')->to('groups#reelect');
-  $r->route('/group/:group/rename')->to('groups#rename');
+  $r->route('/group/:group/change')->to('groups#change');
+  $r->route('/group/new/')->to('groups#new_group');
+
+  # jobs
+  $r->route('/jobs/')->to('jobs#list');
 }
 
 1;

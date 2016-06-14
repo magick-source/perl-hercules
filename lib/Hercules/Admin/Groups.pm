@@ -56,9 +56,6 @@ sub list {
 
   $stash->{groups} = \@groups;
   
-  use Data::Dumper;
-  $stash->{debug_dump} = Dumper(\@groups);
-
   $c->render( template => 'groups/list' );
 }
 
@@ -77,7 +74,7 @@ sub reelect {
   $c->render( text => "ok, maybe" );
 }
 
-sub rename {
+sub change {
   my ($c) = @_;
   
   my $stash = $c->stash;
@@ -89,11 +86,41 @@ sub rename {
 
   my $new_name = $c->param('new_name');
   return $c->reply->exception('invalid new name')
-    if $new_name =~ m{[^\w\-_]};
+    if $new_name !~ m{\A\w[\w\-_]*\w\z};
 
-  $group->rename( $new_name );
+  my $max_jobs = $c->param('max_jobs');
+  return $c->reply->exception('invalid max jobs')
+    if $max_jobs !~ m{\A[0-9]+\z};
+
+  $group->rename( $new_name )
+    if $new_name != $group->group_name;
+  if ($group->max_parallel_jobs != $max_jobs) {
+    $group->max_parallel_jobs( $max_jobs );
+    $group->update;
+  }
   
   $c->render( text => "ok, maybe");
+}
+
+sub new_group {
+  my ($c) = @_;
+
+  my $name = $c->param('new_name');
+  return $c->reply->exception('invalid new name')
+    if $name !~ m{\A\w[\w\-_]*\w\z};
+ 
+  my $max_jobs = $c->param('max_jobs');
+  return $c->reply->exception('invalid max jobs')
+    if $max_jobs !~ m{\A[0-9]+\z};
+
+  my $group = Hercules::Db::Group->create({
+      group_name => $name,
+      max_parallel_jobs => $max_jobs,
+    });
+  return $c->reply->not_found
+    unless $group;
+
+  $c->render( text => "ok, maybe" );
 }
 
 1;

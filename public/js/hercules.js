@@ -39,10 +39,24 @@ jQuery(document).ready(function($) {
       return;
 
     group = group.replace('edit-group-','');
+    var maxname = "#max-jobs-"+group;
+    var max = $( maxname ).text();
+    max = max.replace(/[^0-9]/g, '');
+
     $('#edit-group-form').find('.group-name').text( group );
     $('#edit-group-oldname').val( group );
     $('#edit-group-name').val( group );
+    $('#edit-group-max-jobs').val( max );
     $('#edit-group-form').modal('show');
+  });
+
+  $('#add-new-group').click(function() {
+    $('#edit-group-form').find('.group-name').text( 'NewGroup' );
+    $('#edit-group-oldname').val( '' );
+    $('#edit-group-name').val( 'NewGroup' );
+    $('#edit-group-max-jobs').val( 1 );
+    $('#edit-group-form').modal('show');
+    
   });
 
   $('#edit-group-name').keyup(function() {
@@ -57,25 +71,63 @@ jQuery(document).ready(function($) {
       $( this ).val( newname );
     }
   });
+  $('#edit-group-max-jobs').keyup(function() {
+    var max = $( this ).val();
+    if (max.match(/[^0-9]/)) {
+      formgroup = $(this).closest('.form-group');
+      $( formgroup ).addClass('has-error');
+      setTimeout(function(){
+          $(formgroup).removeClass('has-error');
+        }, 800);
+      max = max.replace(/[^0-9]/g,'');
+      $( this ).val( newname );
+    }
+  });
+
 
   $('#edit-group-form').find('.btn-primary').click(function() {
     group = $('#edit-group-oldname').val();
-    newname = $('#edit-group-name').val();
 
-    if (!newname.match(/\w[\w\-_]*\w/)) {
+    newname = $('#edit-group-name').val();
+    if (!newname.match(/^\w[\w\-_]*\w$/)) {
+      formgroup = $('#edit-group-name').closest('.form-group');
       $( formgroup ).addClass('has-error');
       return;
     }
 
-    var url = "/group/"+group+"/rename";
+    max = $('#edit-group-max-jobs').val();
+    if (!max.match(/^[0-9]+$/)) {
+      formgroup = $('#edit-group-max-jobs').closest('.form-group');
+      $( formgroup ).addClass('has-error');
+      return;
+    }
+
+    var url;
+    if (group) {
+      url = "/group/"+group+"/change";
+    } else {
+      url = '/group/new';
+    }
     $('#edit-group-form').modal('hide');
     $('#spinner-modal').modal('show');
-    $.get( url, { new_name: newname }, function( data) {
+    $.get( url, { new_name: newname, max_jobs: max }, function(data) {
       $('#spinner-modal').modal('hide');
       location.reload();
     }).fail(function(){
       $('#spinner-modal').modal('hide');
       alert('Operation failed');
     });
+  });
+  
+  // list jobs in group
+  $('.btn-list-jobs').click(function() {
+    var group = $(this)[0].id;
+    if (group == "")
+      return;
+
+    group = group.replace('edit-group-','');
+
+    location.href = '/jobs/'+group;
+
   });
 });

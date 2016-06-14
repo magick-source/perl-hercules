@@ -48,7 +48,9 @@
 % for my $group ( @$groups ) {
               <tr>
                 <th><%= $group->{group_name} %></th>
-                <td><%= $group->{max_parallel_jobs} %></td>
+                <td><span id="max-jobs-<%= $group->{group_name} %>">
+                    <%= $group->{max_parallel_jobs} %>
+                  </span></td>
                 <td><%= $group->{last_run_tu} %></td>
                 <td><%= $group->{next_run_tu} %></td>
                 <td>
@@ -73,6 +75,11 @@
                       class="btn btn-danger btn-circle btn-edit-group">
                     <i class="fa fa-edit"> </i>
                   </button>
+                  <button type="button"
+                      id="list-jobs-<%= $group->{group_name} %>"
+                      class="btn btn-primary btn-circle btn-list-jobs">
+                    <i class="fa fa-cog"> </i>
+                  </button>
                   <!-- group options will be here! -->
                 </td>
               </tr>
@@ -80,6 +87,13 @@
             </tbody>
           </table>
         </div>
+      </div>
+      <div class="panel-footer hercules-table-actions">
+        <button type="button"
+            id="add-new-group"
+            class="btn btn-primary btn-circle btn-lg">
+          <i class="fa fa-plus"> </i>
+        </button>
       </div>
     </div>
   </div>
@@ -89,3 +103,4 @@
 <%= include 'groups/inc/relect-dialog' %>
 
 <%= include 'groups/inc/edit-group' %>
+

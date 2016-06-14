@@ -14,7 +14,16 @@
         <div class="form-group">
           <label>Group Name</label>
           <input class="form-control" id="edit-group-name"/>
-          <p class="help-block">The name of the cron group - it may have alphanumeric characters, - and _</p>
+          <p class="help-block">The name of the cron group -
+              it may have alphanumeric characters, - and _
+          </p>
+        </div>
+        <div class="form-group">
+          <label>Max Parallel Jobs</label>
+          <input class="form-control" id="edit-group-max-jobs"/>
+          <p class="help-block">The max number of jobs that can run
+              at the same time.
+          </p>
         </div>
       </div>
       <div class="modal-footer">
