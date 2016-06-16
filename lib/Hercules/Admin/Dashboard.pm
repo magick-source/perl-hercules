@@ -41,11 +41,14 @@ sub index {
       for my $fld (qw(elected reelect last_job_start next_job_start)) {
         $rec->{$fld.'_dt'} = epoch_to_datetime( $rec->{$fld} );
       }
-      $rec->{'next_job_start_tu'} = $rec->{next_job_start} < time
-          ? 'late '. seconds_to_timeunits( time - $rec->{next_job_start} )
-          : 'in '  . seconds_to_timeunits( $rec->{next_job_start} - time );
-      $rec->{'last_job_start_tu'}
-          = seconds_to_timeunits(time - $rec->{last_job_start} ). ' ago';
+      $rec->{'next_job_start_tu'} = $rec->{next_job_start}
+          ? $rec->{next_job_start} < time
+            ? 'late '. seconds_to_timeunits( time - $rec->{next_job_start} )
+            : 'in '  . seconds_to_timeunits( $rec->{next_job_start} - time )
+          : '';
+      $rec->{'last_job_start_tu'} = $rec->{last_job_start}
+        ? seconds_to_timeunits(time - $rec->{last_job_start} ). ' ago'
+        : '';
 
       $rec->{ runnable_jobs } 
         = $group_stats{$group}->{ active }->{ 1 }->{ count } // 0;
@@ -67,7 +70,7 @@ sub index {
         $last_run = $group_stats{''}{$status}{$runnable}{last_run}
           if  $group_stats{''}{$status}{$runnable}{last_run} > $last_run;
 
-#         next unless $runnable;
+        next unless $runnable;
         $next_run = $group_stats{''}{$status}{$runnable}{next_run}
           if !$next_run
             or $group_stats{''}{$status}{$runnable}{next_run} < $next_run;
@@ -81,11 +84,16 @@ sub index {
     my $jobs_ok
       = $group_stats{''}->{ active }->{ 0 }->{ count } // 0;
 
-    my $last_run_tu = seconds_to_timeunits( time - $last_run );
-    $last_run_tu .= ' ago';
-    my $next_run_tu = $next_run < time
-        ? 'late '. seconds_to_timeunits( time - $next_run )
-        : 'in '  . seconds_to_timeunits( $next_run - time );
+    my $last_run_tu = '';
+    if ($last_run) {
+      $last_run_tu = seconds_to_timeunits( time - $last_run );
+      $last_run_tu .= ' ago';
+    }
+    my $next_run_tu = $next_run
+        ? $next_run < time
+          ? 'late '. seconds_to_timeunits( time - $next_run )
+          : 'in '  . seconds_to_timeunits( $next_run - time )
+        : '';
 
     push @ginfo, {
         name              => '',
@@ -117,6 +125,7 @@ sub index {
     $jobs_behind += $group->{runnable_jobs} || 0;
     $jobs_ok     += $group->{active_jobs}   || 0;
     $jobs_failed += $group->{failing_jobs}  || 0;
+    next unless $group->{next_job_start};
     $max_late     = $group->{next_job_start}
       if !$max_late or $max_late > $group->{next_job_start};
   }
