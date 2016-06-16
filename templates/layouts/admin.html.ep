@@ -39,6 +39,7 @@
             <ul class="nav" id="side-menu">
               <li><a href="/"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a></li>
               <li><a href="/groups/"><i class="fa fa-cogs fa-fw"></i> Groups</a></li>
+              <li><a href="/jobs/"><i class="fa fa-cog fa-fw"></i> Jobs</a></li>
             </ul>
           </div>
         </div>

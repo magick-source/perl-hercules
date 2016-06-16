@@ -87,6 +87,14 @@ __PACKAGE__->set_sql(last_run_by_status => q{
     LIMIT %d
 });
 
+__PACKAGE__->set_sql(list => q{
+  SELECT *
+    FROM __TABLE__
+      %s 
+    ORDER by name ASC
+    LIMIT %d
+});
+
 __PACKAGE__->has_a(params => 'Hercules::Params',
     inflate => sub { 
       my $res;
@@ -295,6 +303,53 @@ sub jobs_for_group {
         order_by  => 'next_run_epoch ASC',
       }
     );
+}
+
+sub list_jobs_like {
+  my ($class, %args) = @_;
+
+  my @where = ();
+  my @bind = ();
+  if (my $search = delete $args{search}) {
+    $search = "%$search%";
+    push @where, '(name LIKE ? OR cron_group LIKE ?)';
+    push @bind, $search, $search;
+  }
+  if (my $after = delete $args{after_name}) {
+    push @where, "name > ?";
+    push @bind, $after;
+  }
+  if (my $status = delete $args{status}) {
+    if ($status eq 'ok') {
+      push @where, 'next_run_epoch>= ?';
+      push @bind, time;
+      $status = 'active';
+
+    } elsif ($status eq 'behind' or $status eq 'delayed') {
+      push @where, 'next_run_epoch < ?';
+      push @bind, time - 30;
+      $status = 'active';
+
+    } elsif ($status eq 'failed') {
+      $status = 'failing';
+    }
+
+    $status = "%$status%";
+    push @where, "flags like ?";
+    push @bind, $status;
+  }
+  if (my $group = delete $args{group}) {
+    push @where, 'cron_group=?';
+    push @bind, $group;
+  }
+
+  my $where = join " AND ", @where;
+  $where = $where ? "WHERE $where" : '';
+
+  my $sth = $class->sql_list( $where, 50 );
+  $sth->execute( @bind );
+
+  return $class->sth_to_objects( $sth );
 }
 
 sub status {

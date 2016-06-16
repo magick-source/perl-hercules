@@ -28,6 +28,7 @@ sub startup {
 
   # jobs
   $r->route('/jobs/')->to('jobs#list');
+  $r->route('/jobs/:group')->to('jobs#list');
 }
 
 1;

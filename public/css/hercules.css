@@ -17,10 +17,11 @@
   border-color: #5cb85c;
   color: #5cb85c;
 }
+tr.job-status-ok {} /* just use the defaults! */
 .jobtag-ok a {
   color: #5cb85c;
 }
-.jobtag-running {
+.jobtag-running, tr.job-status-running {
   background-color: #d9edf7;
   border-color: #337ab7;
   color: #337ab7; 
@@ -28,7 +29,7 @@
 .jobtag-running a {
   color: #337ab7; 
 }
-.jobtag-delayed {
+.jobtag-delayed, tr.job-status-delayed {
   background-color: #fcf8e3;
   border-color: #f0ad4e;
   color: #f0ad4e;
@@ -36,7 +37,7 @@
 .jobtag-delayed a {
   color: #f0ad4e;
 }
-.jobtag-failing {
+.jobtag-failing, tr.job-status-failing {
   background-color: #f2dede;
   border-color: #d9534f;
   color: #d9534f;

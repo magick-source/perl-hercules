@@ -125,7 +125,7 @@ jQuery(document).ready(function($) {
     if (group == "")
       return;
 
-    group = group.replace('edit-group-','');
+    group = group.replace('list-jobs-','');
 
     location.href = '/jobs/'+group;
 

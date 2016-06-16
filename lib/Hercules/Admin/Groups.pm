@@ -32,14 +32,17 @@ sub list {
 
   for my $group (@groups) {
     $group->{last_run_tu}
-      = seconds_to_timeunits( time - $group->{last_run_start_epoch} )
-        . ' ago';
+      = $group->{last_run_start_epoch}
+        ? seconds_to_timeunits( time - $group->{last_run_start_epoch} )
+        : '';
     
     my $next_run = $group->{next_run_start_epoch};
     $group->{next_run_tu}
-      = $next_run < time
-        ? 'late '. seconds_to_timeunits( time - $next_run )
-        : 'in '  . seconds_to_timeunits( $next_run - time );
+      = $next_run
+        ? $next_run < time
+          ? 'late '. seconds_to_timeunits( time - $next_run )
+          : 'in '  . seconds_to_timeunits( $next_run - time )
+        : '';
   
     $group->{jobs} = [];
     my @jobs =  $group->get_jobs;

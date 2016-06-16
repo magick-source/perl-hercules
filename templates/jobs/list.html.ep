@@ -18,9 +18,11 @@
           <div class="col-lg-12">
             <form method="get">
               <div class="input-group custom-search-form">
+                <input type="hidden" name="status"
+                  value="<%== $param_status//'' %>" />
                 <input type="text"
                     name="search"
-                    value="<%== $search//'' %>"
+                    value="<%== $param_search//'' %>"
                     class="form-control"
                     placeholder="Search...">
                 <span class="input-group-btn">
@@ -44,11 +46,16 @@
             </thead>
             <tbody>
 % for my $job ( @$jobs ) {
-              <tr>
-                <th><%= $job->{name} %></th>
+              <tr class="job job-list-line
+                    job-status-<%= $job->{status} %>"
+                  id="job-list-line-<%= $job->{name} %>">
+                <th>
+                  <i class="fa fa-<%= $job->{icon}%>"> </i>
+                  <%= $job->{name} %>
+                </th>
                 <td><%= $job->{cron_group} %></td>
-                <td><%= $job->{last_run_ok_epoch} %></td>
-                <td><%= $job->{next_run_epoch} %></td>
+                <td><%= $job->{last_run_tu} %></td>
+                <td><%= $job->{next_run_tu} %></td>
                 <td>
                   <!-- job options will be here! -->
                 </td>

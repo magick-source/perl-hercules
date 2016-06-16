@@ -8,16 +8,12 @@ use Hercules::Utils qw(
   seconds_to_timeunits
 );
 
-# my %status2db = (
-#   active  => { flags => { -like => "%active%" }},
-#   ok      => { flags => { -like => "%active%" },
-#                next_run_epoch  => {'>=' => 'UNIX_TIMESTAMP()'}
-#              },
-#   behind  => { flags => { -like => "%active%" },
-#                next_run_epoch  => {'<' => 'UNIX_TIMESTAMP()'},
-#              },
-#   failed  => { flags => {'-like' => "%failed%"} },
-# );
+my %status2icon   = ( 
+  failing => 'times',
+  running => 'rocket',
+  ok      => 'check',
+  delayed => 'clock-o',
+);
 
 sub list {
   my ($c) = @_;
@@ -30,34 +26,34 @@ sub list {
   my $group  = $stash->{group};
 
   my %search;
-  if ($status) {
-    %search = %{ $status2db{ $status } || {} };
-  }
-  if ( $group ) {
-    $search{ cron_group } = $group;
-  }
-  if ( $search ) {
-    $search{ name } = { -like => "%$search%" };
-  }
 
-  my @jobs;
-#   = Hercules::Db::Schedule->search(
-#       \%search,
-#       { columns => [qw(
-#               id
-#               name
-#               cron_group
-#               last_run_ok_epoch
-#               next_run_epoch
-#               running_until_epoch
-#               flags
-#           )],
-#       }
-#     );
+  my @jobs = Hercules::Db::Schedule->list_jobs_like(
+      status  => $status,
+      search  => $search,
+      group   => $group,
+    );
+
+  for my $job (@jobs) {
+      $job->{last_run_tu} = $job->{last_run_ok_epoch}
+        ? seconds_to_timeunits( time - $job->{last_run_ok_epoch} )
+            .' ago'
+        : '';
+      my $next_run = $job->{next_run_epoch};
+      $job->{next_run_tu} = $next_run
+        ? $next_run < time
+          ? 'late '. seconds_to_timeunits( time - $next_run )
+          : 'in '  . seconds_to_timeunits( $next_run - time )
+        : '';
+      $job->{status}  = $job->status;
+		  $job->{icon}    = $status2icon{ $job->status };
+  }
 
   $stash->{ jobs } = \@jobs;
-  $stash->{ search } = $search;
-  $stash->{ status } = $status;
+  $stash->{ param_search } = $search;
+  $stash->{ param_status } = $status;
+
+  use Data::Dumper;
+  $stash->{debug_dump} = Dumper(\@jobs);
 
   $c->render( template => 'jobs/list' );
 }
