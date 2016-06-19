@@ -19,6 +19,7 @@ __PACKAGE__->columns( Primary => 'id' );
 __PACKAGE__->columns( Essential => qw(
   id
   name
+  cron_group
   last_run_ok_epoch
   running_until_epoch
   running_server
@@ -109,6 +110,29 @@ __PACKAGE__->has_a(params => 'Hercules::Params',
       },
   );
 
+sub params_as_text {
+  my ($self) = @_;
+  my $params = $self->params;
+
+  return '' unless $params and ref $params and keys %$params;
+
+  my $json;
+  eval { $json = to_json( {%$params}, {utf8=>1, pretty=>1}); };
+  return '' unless $json;
+
+  $json =~ s|\A\s*{||;
+  $json =~ s{\A\s[\r\n]*}{}m;
+  $json =~ s|\s*}\s*\z||;
+
+  my ($minspaces) = sort { $a <=> $b }
+        map { length $_ }
+          $json =~ m{^(\s*)\S}mg;
+
+  $json =~ s{^\s{$minspaces}}{}mg;
+
+  return $json;
+}
+
 sub count_runnable {
   my ($class,@groups) = @_;
 
@@ -198,6 +222,12 @@ sub add_output {
   $out->update;
 
   return;
+}
+
+sub get_output {
+  my ($self) = @_;
+
+  return Hercules::Db::Output->retrieve( cronjob_id => $self->id );
 }
 
 sub get_next_run_for_group {
@@ -321,8 +351,8 @@ sub list_jobs_like {
   }
   if (my $status = delete $args{status}) {
     if ($status eq 'ok') {
-      push @where, 'next_run_epoch>= ?';
-      push @bind, time;
+      push @where, 'next_run_epoch>= ? OR running_until_epoch> ?';
+      push @bind, time-30, time;
       $status = 'active';
 
     } elsif ($status eq 'behind' or $status eq 'delayed') {
@@ -357,11 +387,13 @@ sub status {
 
   my $status = $self->flags =~ m{failing}
       ? 'failing'
-      : $self->running_until_epoch > time
-        ? 'running'
-        : $self->next_run_epoch > time
-          ? 'ok'
-          : 'delayed';
+      : $self->flags =~ m{active}
+        ? $self->running_until_epoch > time
+          ? 'running'
+          : $self->next_run_epoch > time
+            ? 'ok'
+            : 'delayed'
+        : 'stopped';
 
   return $status;
 }

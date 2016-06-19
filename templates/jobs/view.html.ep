@@ -1,0 +1,84 @@
+% layout 'admin', title => $title || 'List';
+
+<div class="row">
+  <div class="col-lg-12">
+    <h1 class='page-header'> Job - view '<%= $job->{name} %>'</h1>
+  </div>
+</div>
+
+<div class="row">
+
+  <div class="col-lg-12">
+    <div class="panel panel-<%= $job->{panel_class} %>">
+      <div class="panel-heading">
+        View Job '<b><%= $job->name %></b>'
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr><th>Job Name</th><th><%= $job->name %></th></tr>
+            </thead>
+            <tbody>
+              <tr><th>Status</th><td><%= $job->status %></td></tr>
+              <tr><th>Cron Group</th><td><%= $job->cron_group %></td></tr>
+              <tr><th>Class</th><td><%= $job->class %></td></tr>
+              <tr><th>Parameter</th>
+                  <td><pre><%= $job->params_as_text %></pre></td>
+                </tr>
+% if ($job->run_every) {
+              <tr><th>Runs Every</th><td><%= $job->run_every %></td></tr>
+% } elsif ($job->run_schedule) {
+              <tr><th>Run Schedule</th><td><%= $job->run_schedule %></td></tr>
+% }
+              <tr><th>Last run ok</th><td><%= $job->{last_run_ok_epoch_dt} %></td></tr>
+              <tr><th>Next Run</th><td>
+% if ($job->{now_running}) {
+                  Now running. Expected to finish before '<%= $job->{running_until_epoch_dt} %>' ( <%= $job->{running_until_epoch_tu} %> )
+% } elsif ($job->{flags} =~ m{active}) {
+                  <%= $job->{next_run_epoch_dt} %> ( <%= $job->{next_run_epoch_tu} %> )
+% } else {
+                  Not Scheduled
+% } 
+                </td></tr>
+% if ($job->{now_running}) {
+              <tr><th>Run in Server</th><td><%= $job->running_server %></td></tr>
+% }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="panel-footer hercules-table-actions">
+        <button type="button"
+            id="go-back"
+            class="btn btn-info btn-circle btn-lg btn-go-back"
+            title="Go Back">
+          <i class="fa fa-arrow-left"> </i>
+        </button>
+        <button type="button"
+            id="edit-job-<%= $job->{name} %>"
+            class="btn btn-danger btn-circle btn-lg btn-edit-job"
+            title="Edit Job">
+          <i class="fa fa-edit"> </i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+% if ( $job_output and ref $job_output) {
+  <div class="col-lg-12">
+    <div class="panel panel-info">
+      <div class="panel-heading"> 
+        Last Output for <%= $job->name %>
+      </div>
+      <div class="panel-body">
+        <pre><%= $job_output->{output} %></pre>
+      </div>
+      <div class="panel-footer">
+        At <%= $job_output->{run_epoch_dt} %> in <%= $job_output->{server_name} %> (exit code: <%= $job_output->{exit_code} %>)
+      </div>
+    </div>
+  </div>
+% }
+</div>
+

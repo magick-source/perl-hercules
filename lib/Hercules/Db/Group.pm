@@ -39,6 +39,12 @@ SELECT * FROM __TABLE__
  LIMIT 50
 });
 
+__PACKAGE__->set_sql( select_group_list => q{
+SELECT group_name, max_parallel_jobs, server_name
+  FROM __TABLE__
+  ORDER by IF(elected_epoch,elected_epoch,UNIX_TIMESTAMP()) DESC
+});
+
 sub elect_group {
   my ($class) = @_;
 
@@ -134,6 +140,24 @@ sub rename {
   $self->delete;
 
   return;
+}
+
+sub all_groups {
+  my ($class) = @_;
+
+  my $sth = $class->sql_select_group_list();
+  $sth->execute();
+  $sth->bind_columns(\my ($name, $jobs, $server));
+  my @groups;
+  while ($sth->fetch()) {
+    push @groups, {
+        name      => $name,
+        max_jobs  => $jobs,
+        server    => $server
+      };
+  }
+
+  return wantarray ? @groups : \@groups;
 }
 
 1;

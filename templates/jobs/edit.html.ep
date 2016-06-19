@@ -1,0 +1,123 @@
+% layout 'admin', title=> $title || 'Edit Job';
+
+<div class="row">
+  <div class="col-lg-12">
+    <h1 class='page-header'> Job - view '<%= $job->{name} %>'</h1>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-12">
+    <div class="panel panel-info">
+      <div class="panel-heading">
+% if ($job and $job->{name}) {
+        Edit Job '<%= $job->{name} %></b>'
+% } else {
+        New Job
+% }
+      </div>
+      <div class="panel-body">
+        <div class="form-group">
+          <label>Job Name</label>
+          <input class="form-control" id="edit-job-name"
+            value="<%= $job->{name} %>" />
+          <p class="help-block">The name of the job -
+            it may have alphanumeric characters, - and _
+          </p>
+        </div>
+        <div class="form-group">
+          <label>Cron Group</label>
+          <select class="form-control" id="edit-job-crongroup">
+            <option value=''>--no group--</option>
+% for my $group (@$all_groups) {
+            <option value="<%= $group->{name} %>"
+              <%= $job->{cron_group} eq $group->{name}? " SELECTED=1":'' %>
+              ><%=$group->{name} %> ( max <%= $group->{max_jobs} %>
+                jobs in <%= $group->{server} %> )
+            </option>
+% }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Class</label>
+          <div class="input-group">
+            <span class="input-group-addon">
+                <input type="radio" name="useclass" value="core"
+                  <%= $job->{usecoreclass} ? 'checked=1' : '' %>
+                />
+                Core Class
+              </span>
+            <select id="edit-group-core_class" class="form-control">
+              <option>--please, select--</option>
+% for my $class (@$core_job_classes) {
+              <option value="<%= $class %>"
+                  <%= $job->{class} eq $class?" SELECTED=1" : '' %>
+                >
+                  <%= $class %>
+              </option>
+% }
+            </select>
+          </div><br/>
+          <div class="input-group">
+            <span class="input-group-addon">
+                <input type="radio" name="useclass" value="nocore"
+                  <%= $job->{usecoreclass} ? '' : 'checked=1' %>
+                />
+                Non-Core
+              </span>
+            <input class="form-control" id="edit-job-class"
+% unless ($job->{usecoreclass}) {
+              value="<%= $job->{class} || '' %>"
+% }
+              />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Params</label>
+          <textarea class="form-control" rows=4 id="edit-job-params"
+            ><%= $job->{params_as_text} %></textarea>
+          <p class="help-block">Treat the parameters as a JSON hash
+            - deep structures are possible - use , to separate multiple
+            parameters.
+          </p>
+        </div>
+        <div class="form-group">
+          <label>Running Schedule</label>
+          <div class="input-group">
+            <span class="input-group-addon">
+              <input type="radio" name="runtype" value="every"
+                  <%= $job->{run_every}?' checked=1':'' %>
+                /> Run every
+            </span>
+            <input class="form-control" id="edit-job-run-every"
+              value="<%= $job->{run_every} %>" />
+          </div>
+          <p class="help-block">Valid units are s=seconds, m=minutes,
+              h=hours, d=days, w=weeks, M=months, y=years
+              - default unit is days
+          </p>
+          <div class="input-group">
+            <span class="input-group-addon">
+              <input type="radio" name="runtype" value="cron"
+                  <%= (!$job->{run_every} and $job->{run_schedule})
+                      ?'checked=1':'' %>
+                /> Run schedule
+            </span>
+            <input class="form-control" id="edit-job-run-every"
+              value="<%= $job->{run_schedule} %>" />
+          </div>
+          <p class="help-block">Use a cron schedule definition
+              - see <a href="http://man.he.net/man5/crontab"
+              target="_blank">crontab(5)</a>
+              for details.
+          </p>
+
+        </div>
+      </div>
+      <div class="panel-footer hercules-table-actions">
+        <button type="button" class="btn btn-secondary">Cancel</button>
+        <button type="button" class="btn btn-primary">Update</button>
+      </table>
+    </div>
+  </div>
+</div>

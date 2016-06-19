@@ -13,6 +13,7 @@ my %status2icon   = (
   running => 'rocket',
   ok      => 'check',
   delayed => 'clock-o',
+  stopped => 'pause',
 );
 
 sub list {

@@ -57,6 +57,41 @@
                 <td><%= $job->{last_run_tu} %></td>
                 <td><%= $job->{next_run_tu} %></td>
                 <td>
+                  <button type="button"
+                      id="edit-job-<%= $job->{name} %>"
+                      class="btn btn-danger btn-circle btn-edit-job"
+                      title="Edit Job">
+                    <i class="fa fa-edit"> </i>
+                  </button>
+% if ($job->{status} eq 'failing') {
+                  <button type="button"
+                      id="retry-job-<%= $job->{name} %>"
+                      class="btn btn-info btn-circle btn-retry-job"
+                      title="Retry Job">
+                    <i class="fa fa-repeat"></i>
+                  </button>
+% } elsif ($job->{status} eq 'stopped') {
+                  <button type="button"
+                      id="start-job-<%= $job->{name} %>"
+                      class="btn btn-primary btn-circle btn-start-job"
+                      title="Start Job">
+                    <i class="fa fa-play"></i>
+                  </button>
+% } else {
+                  <button type="button"
+                      id="stop-job-<%= $job->{name} %>"
+                      class="btn btn-warning btn-circle btn-stop-job"
+                      title="Stop Job">
+                    <i class="fa fa-pause"></i>
+                  </button>
+% }             
+                  <button type="button"
+                      id="view-job-<%= $job->{name} %>"
+                      class="btn btn-success btn-circle btn-view-job"
+                      title="View Job">
+                    <i class="fa fa-eye"></i>
+                  </button>
+                  
                   <!-- job options will be here! -->
                 </td>
               </tr>
@@ -68,7 +103,8 @@
       <div class="panel-footer hercules-table-actions">
         <button type="button"
             id="add-new-job"
-            class="btn btn-primary btn-circle btn-lg">
+            class="btn btn-primary btn-circle btn-lg"
+            title="Add New Job">
           <i class="fa fa-plus"> </i>
         </button>
       </div>
@@ -76,5 +112,4 @@
   </div>
 
 </div>
-
 

@@ -12,6 +12,7 @@ use POSIX qw(strftime);
 our @EXPORT_OK = qw(
   epoch_to_datetime
   seconds_to_timeunits
+  stash_core_job_classes
 );
 
 my %date_formats = (
@@ -74,4 +75,12 @@ sub seconds_to_timeunits {
   return $res;
 }
 
+my @core_job_classes = qw(
+  Hercules::Job::HTTPGet
+  Hercules::Job::Test
+);
+sub stash_core_job_classes {
+  my ($c) = @_;
+  $c->stash->{core_job_classes} = \@core_job_classes;
+}
 1;

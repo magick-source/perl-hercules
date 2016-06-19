@@ -67,20 +67,22 @@
                 <td>
                   <button type="button"
                       id="elect-group-<%= $group->{group_name} %>"
-                      class="btn btn-warning btn-circle btn-elect-group">
+                      class="btn btn-warning btn-circle btn-elect-group"
+                      title="Re-elect Server for this group">
                     <i class="fa fa-unlink"> </i>
                   </button>
                   <button type="button"
                       id="edit-group-<%= $group->{group_name} %>"
-                      class="btn btn-danger btn-circle btn-edit-group">
+                      class="btn btn-danger btn-circle btn-edit-group"
+                      title="Edit Group">
                     <i class="fa fa-edit"> </i>
                   </button>
                   <button type="button"
                       id="list-jobs-<%= $group->{group_name} %>"
-                      class="btn btn-primary btn-circle btn-list-jobs">
-                    <i class="fa fa-cog"> </i>
+                      class="btn btn-primary btn-circle btn-list-jobs"
+                      title="List Jobs">
+                    <i class="fa fa-cogs"> </i>
                   </button>
-                  <!-- group options will be here! -->
                 </td>
               </tr>
 % }
@@ -91,7 +93,8 @@
       <div class="panel-footer hercules-table-actions">
         <button type="button"
             id="add-new-group"
-            class="btn btn-primary btn-circle btn-lg">
+            class="btn btn-primary btn-circle btn-lg"
+            title="Add new group">
           <i class="fa fa-plus"> </i>
         </button>
       </div>

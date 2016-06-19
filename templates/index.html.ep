@@ -65,17 +65,19 @@
 
 <%= include 'inc/small-group-list' %>
 <%= include 'inc/small-job-list',
-      jobs  => $last_failed,
-      class => 'red',
-      title => 'Last Failed Jobs',
-      icon  => 'times',
+      jobs    => $last_failed,
+      class   => 'red',
+      title   => 'Last Failed Jobs',
+      icon    => 'times',
+      status  => 'failed',
 %>
 
 <%= include 'inc/small-job-list',
-      jobs  => $last_runned,
-      class => 'green',
-      title => 'Last Runned Jobs',
-      icon  => 'check',
+      jobs    => $last_runned,
+      class   => 'green',
+      title   => 'Last Runned Jobs',
+      icon    => 'check',
+      status  => 'ok',
 %>
 
 </div>

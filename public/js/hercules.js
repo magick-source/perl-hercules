@@ -1,5 +1,7 @@
 jQuery(document).ready(function($) {
 
+  $('button').tooltip();
+
   // re-elect group
   $('.btn-elect-group').click(function(){
     var group = $(this)[0].id;
@@ -128,6 +130,74 @@ jQuery(document).ready(function($) {
     group = group.replace('list-jobs-','');
 
     location.href = '/jobs/'+group;
+  });
 
+  // start job
+  $('.btn-start-job,.btn-retry-job').click(function() {
+    var job=$(this)[0].id;
+    if (job == '')
+      return;
+
+    job = job.match(/start-job/)
+        ? job.replace('start-job-','')
+        : job.replace('retry-job-','');
+    url = '/job/'+job+'/start';
+    $('#spinner-modal').modal('show');
+    $.get(url, function(data) {
+      $('#spinner-modal').modal('hide');
+      location.reload();
+    }).fail(function() {
+      $('#spinner-modal').modal('hide');
+      alert('Operation failed');
+    });
+  });
+
+  // stop job
+  $('.btn-stop-job').click(function() {
+    var job=$(this)[0].id;
+    if (job == '')
+      return;
+
+    job = job.replace('stop-job-','');
+    url = '/job/'+job+'/stop';
+    $('#spinner-modal').modal('show');
+    $.get(url, function(data) {
+      $('#spinner-modal').modal('hide');
+      location.reload();
+    }).fail(function() {
+      $('#spinner-modal').modal('hide');
+      alert('Operation failed');
+    });
+  });
+
+  $('.btn-view-job').click(function() {
+    var job=$(this)[0].id;
+    if (job == '')
+      return;
+
+    job = job.replace('view-job-','');
+    if (job == '')
+      return;
+
+    url = '/job/'+job;
+    location.href = url;
+  });
+
+  // edit job
+  $('.btn-edit-job').click(function() {
+    var job=$(this)[0].id;
+    if (job == '')
+      return;
+
+    job = job.replace('edit-job-','');
+    if (job == '')
+      return;
+
+    url = '/job/'+job+'/edit';
+    location.href = url;
+  });
+
+  $('.btn-go-back').click(function() {
+    history.back();
   });
 });
