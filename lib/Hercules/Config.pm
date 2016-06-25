@@ -1,6 +1,6 @@
 package Hercules::Config;
 
-our $VERSION = '0.1.0';
+our $VERSION = '0.2.0';
 
 use Config::RecurseINI 'hercules' => qw(config);
 

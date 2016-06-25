@@ -115,8 +115,8 @@ sub index {
   }
 
   @ginfo = sort {
-          $b->{runnable_jobs}   <=> $a->{runnable_jobs}
-      ||  $b->{next_job_start}  <=> $a->{next_job_start}
+          $b->{runnable_jobs}//0      <=> $a->{runnable_jobs} // 0
+      ||  $b->{next_job_start}//time  <=> $a->{next_job_start} // time
     } @ginfo;
 
   my ($jobs_behind, $jobs_ok, $jobs_failed, $max_late) = (0,0,0,0);

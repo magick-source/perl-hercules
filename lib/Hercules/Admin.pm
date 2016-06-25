@@ -29,6 +29,8 @@ sub startup {
   # jobs
   $r->route('/jobs/')->to('jobs#list');
   $r->route('/jobs/:group')->to('jobs#list');
+  $r->route('/job/new')->to('jobs#new_job');
+  $r->route('/job/add')->to('jobs#save');
   $r->route('/job/:job')->to('jobs#view');
   $r->route('/job/:job/start')->to('jobs#start');
   $r->route('/job/:job/stop')->to('jobs#stop');

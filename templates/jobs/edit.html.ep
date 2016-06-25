@@ -2,7 +2,11 @@
 
 <div class="row">
   <div class="col-lg-12">
-    <h1 class='page-header'> Job - view '<%= $job->{name} %>'</h1>
+% if ($job->{name} ) {
+    <h1 class='page-header'> Job - edit '<%= $job->{name} %>'</h1>
+% } else {
+    <h1 class='page-header'> edit new job</h1>
+% }
   </div>
 </div>
 
@@ -18,6 +22,8 @@
       </div>
       <div class="panel-body">
         <div class="form-group">
+          <input type="hidden" id="edit-job-old-name"
+              value="<%= $job->{name} %>" />
           <label>Job Name</label>
           <input class="form-control" id="edit-job-name"
             value="<%= $job->{name} %>" />
@@ -103,7 +109,7 @@
                       ?'checked=1':'' %>
                 /> Run schedule
             </span>
-            <input class="form-control" id="edit-job-run-every"
+            <input class="form-control" id="edit-job-run-cron"
               value="<%= $job->{run_schedule} %>" />
           </div>
           <p class="help-block">Use a cron schedule definition
@@ -115,8 +121,8 @@
         </div>
       </div>
       <div class="panel-footer hercules-table-actions">
-        <button type="button" class="btn btn-secondary">Cancel</button>
-        <button type="button" class="btn btn-primary">Update</button>
+        <button type="button" class="btn btn-secondary btn-go-back">Cancel</button>
+        <button type="button" class="btn btn-primary btn-save-job-changes">Update</button>
       </table>
     </div>
   </div>

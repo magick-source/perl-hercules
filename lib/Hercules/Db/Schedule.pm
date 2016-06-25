@@ -110,6 +110,13 @@ __PACKAGE__->has_a(params => 'Hercules::Params',
       },
   );
 
+sub set_params {
+  my ($self, $params) = @_;
+
+  $params = {} unless $params;
+  return $self->params( bless { %$params }, 'Hercules::Params' );
+}
+
 sub params_as_text {
   my ($self) = @_;
   my $params = $self->params;

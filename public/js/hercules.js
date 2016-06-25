@@ -200,4 +200,138 @@ jQuery(document).ready(function($) {
   $('.btn-go-back').click(function() {
     history.back();
   });
+
+  $('#edit-job-name').keyup(function() {
+    var newname = $( this ).val();
+    if (newname.match(/[^\w\-_]/)) {
+      formgroup = $(this).closest('.form-group');
+      $( formgroup ).addClass('has-error');
+      setTimeout(function(){
+          $(formgroup).removeClass('has-error');
+        }, 800);
+      newname = newname.replace(/[^\w\-_]/g,'');
+      $( this ).val( newname );
+    }
+  });
+
+  $('#add-new-job').click(function() {
+    url = '/job/new';
+    location.href = url;
+  });
+
+  // Save job edit
+  $('.btn-save-job-changes').click(function() {
+    var data = {};
+    data.name = $('#edit-job-name').val();
+    var errors = 0;
+    formgroup = $('#edit-job-name').closest('.form-group');
+    $(formgroup).removeClass('has-error');
+    if (data.name == '' || data.name.match(/[^\w\-_]/)) {
+      $( formgroup ).addClass('has-error');
+      errors++;
+    }
+
+    // cron group
+    data.cron_group = $('#edit-job-crongroup option:selected').val();
+
+    // class
+    var useclass=$('[name=useclass]:checked').val();
+    console.log('useclass: '+useclass);
+    var usegroup = $('#edit-group-core_class').closest('.form-group');
+    $(usegroup).removeClass('has-error');
+    if (useclass == '' ) {
+      $(usegroup).addClass('has-error');
+      errors++; 
+    } else if (useclass == 'core') {
+      data.jobclass = $('#edit-group-core_class').val();
+      if (data.jobclass == '') {
+        $(usegroup).addClass('has-error');
+        errors++;
+      }
+    } else if (useclass == 'nocore') {
+      data.jobclass = $('#edit-job-class').val();
+      if (data.jobclass == '') {
+        $(usegroup).addClass('has-error');
+        errors++;
+      }
+    }
+    if (data.jobclass != '') {
+      if (!data.jobclass.match(/^\w+(::\w+)*(::)?$/)) {
+        $(usegroup).addClass('has-error');
+        errors++;
+      }
+    }
+
+    // params
+    var params = $('#edit-job-params').val();
+    $('#edit-job-params').closest('.form-group').removeClass('has-error');
+    if (params != '') {
+      var paramjson = '{'+params+'}';
+      try {
+        paramobj = JSON.parse( paramjson );
+        data.params = params;
+      } catch(e) {
+        $('#edit-job-params').closest('.form-group').addClass('has-error'); 
+        errors++;
+      }
+    }
+
+    //run schedule
+    var usesched=$('[name=runtype]:checked').val();
+    var schdgroup=$('#edit-job-run-every').closest('.form-group');
+    $(schdgroup).removeClass('has-error');
+    if (usesched == '') {
+      $(schdgroup).addClass('has-error');
+      errors++;
+    } else if ( usesched == 'every') {
+      data.every = $('#edit-job-run-every').val();
+      if (data.every == '') {
+        $(schdgroup).addClass('has-error');
+        errors++;
+
+      } else if (!data.every.match(/^\d+[smhdwMy]?$/)) {
+        $(schdgroup).addClass('has-error');
+        errors++;
+      }
+    } else if ( usesched == 'cron' ) {
+      data.cron = $('#edit-job-run-cron').val();
+      if ( data.cron == '' ) {
+        $(schdgroup).addClass('has-error');
+        errors++;
+        
+      } else {
+        var parts = data.cron.split(' ');
+        if ( parts.length != 5 ) {
+          $(schdgroup).addClass('has-error');
+          errors++;
+        } else {
+          for (i=0; i < parts.length; i++) {
+            if (!parts[i].match(/^(\*(\/\d+)?|\d+(,\d+)*)$/)) {
+              $(schdgroup).addClass('has-error');
+              errors++;
+            }
+          }
+        }
+      }
+    }
+    
+    if ( errors === 0 ) {
+      var url;
+      var oldname = $('#edit-job-old-name').val();
+      if ( oldname ) {
+        url = '/job/'+oldname+'/save/';
+      } else {
+        url = '/job/add';
+      }
+      $('#spinner-modal').modal('show');
+      $.post(url, data, function( res ) {
+          $('#spinner-modal').modal('hide');
+          url = '/job/'+data.name;
+          location.href = url;
+        }).fail(function() {
+          $('#spinner-modal').modal('hide');
+          alert('Operation failed');
+        });
+    }
+  });
 });

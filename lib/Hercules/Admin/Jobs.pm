@@ -11,6 +11,8 @@ use Hercules::Utils qw(
   stash_core_job_classes
 );
 
+use JSON qw(from_json);
+
 my %status2icon   = ( 
   failing => 'times',
   running => 'rocket',
@@ -67,9 +69,6 @@ sub list {
   $stash->{ jobs } = \@jobs;
   $stash->{ param_search } = $search;
   $stash->{ param_status } = $status;
-
-  use Data::Dumper;
-  $stash->{debug_dump} = Dumper(\@jobs);
 
   $c->render( template => 'jobs/list' );
 }
@@ -142,9 +141,9 @@ sub view {
   $stash->{job} = $job;
 
   my $output = $job->get_output();
-  my $out = $stash->{job_output} = $output 
+  my $out = $stash->{job_output} = ($output 
     ? {%{ $output }}
-    : 0;
+    : 0);
 
   if ($out and $out->{run_epoch}) {
     $out->{run_epoch_tu} = seconds_to_timeunits( $out->{run_epoch}, 3 );
@@ -173,10 +172,118 @@ sub edit {
   _stash_groups( $c );
   stash_core_job_classes( $c );
 
-  use Data::Dumper;
-  $stash->{debug_dump} = Dumper( $c->stash );
+  $c->render(template => 'jobs/edit');
+}
+
+sub new_job {
+  my ($c) = @_;
+  $c->stash->{job} = {};
+  _stash_groups( $c );
+  stash_core_job_classes( $c );
 
   $c->render(template => 'jobs/edit');
+}
+
+sub save {
+  my ($c) = @_;
+  my $stash = $c->stash;
+
+  my %data;
+  my ($name) = $c->param('name');
+  return $c->reply->exception('Invalid name')
+    if $name !~ m{\A\w[\w_\-]*\w\z};
+  $data{name} = $name;
+
+  my $jobname = $stash->{job};
+  my $job;
+  if ($jobname) {
+    ($job) = Hercules::Db::Schedule->retrieve(name => $jobname);
+    return $c->render->not_found
+      unless $job;
+  } else {
+    return $c->render->exception
+      unless $name;
+
+    ($job) = Hercules::Db::Schedule->retrieve(name => $name);
+
+    my $replace = $c->param('replace');
+
+    if ($job and !$replace) {
+      return $c->render(
+          text => 'Another job with same name exists',
+          status => 406
+        );
+    }
+  }
+
+  $data{cron_group} = $c->param('cron_group') // 0;
+  if ($data{cron_group}) {
+    my ($grp) = Hercules::Db::Group->retrieve($data{cron_group});
+    return $c->reply->exception('Invalid cron group')
+      unless $grp;
+  } #no group? no problem
+
+  $data{class} = $c->param('jobclass');
+  if (!$data{class} or $data{class} !~ m{\A\w+(::\w+)*(::)?\z}) {
+    return $c->reply->exception('Invalid job class');
+  }
+
+  $data{params} = $c->param('params');
+  if ($data{params}) {
+    eval {
+      my $obj = from_json('{'.$data{params}.'}', {utf8=>1});
+      $data{params} = $obj // {};
+      1;
+    } or do {
+      return $c->reply->exception('Invalid params');
+    };
+  } else {
+    $data{params} = {};
+  }
+
+  if ($data{run_every} = $c->param('every')) {
+    if ($data{run_every} !~ m{\A\d+[smhdwMy]?\z}) {
+      return $c->reply->exception('Invalid run_every parameter');
+    }
+  } elsif ($data{run_schedule} = $c->param('cron')) {
+    my @parts = split /\s/, $data{run_schedule};
+    return $c->reply->exception('Invalid run_schedule')
+      if @parts != 5;
+    for my $part (@parts) {
+      return $c->reply->exception('Invalid run_schedule')
+        if $part !~ m{\A(\*(/\d+)?|\d+(,\d+)*)\z};
+    }
+  } else {
+    ## do nothing - this will be expanded to allow
+    #  * run_after - a job is scheduled when another job
+    #                ends successfully.
+    #  * run_on_demand - a rest call to request a job to be run
+    #
+    # but for now, we just keep this empty.
+  }
+
+  $data{run_every} ||= '';
+  $data{run_schedule} ||= '';
+
+  # if we got here, everything should be ok
+  # params is a object, because of serialization
+  unless ($job) {
+    my $_params = delete $data{params} || {};
+    $data{flags} = 'active';
+    ($job) = Hercules::Db::Schedule->create(\%data);
+    %data = ( params => $_params );
+  }
+ 
+  for my $k (keys %data) {
+    if ($k eq 'params') {
+      $job->set_params( $data{$k} );
+    } else {
+      $job->$k($data{$k});
+    }
+  }
+  $job->update;
+
+  return $c->render(text => 'ok, maybe');
 }
 
 sub _stash_groups {

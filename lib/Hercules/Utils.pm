@@ -72,6 +72,10 @@ sub seconds_to_timeunits {
     last unless --$units;
   }
 
+  if ($seconds > 5*60) {
+    $res .= '+';
+  }
+
   return $res;
 }
 
