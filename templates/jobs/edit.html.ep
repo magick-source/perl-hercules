@@ -37,7 +37,7 @@
             <option value=''>--no group--</option>
 % for my $group (@$all_groups) {
             <option value="<%= $group->{name} %>"
-              <%= $job->{cron_group} eq $group->{name}? " SELECTED=1":'' %>
+              <%= $job->{cron_group}||'' eq $group->{name}? " SELECTED=1":'' %>
               ><%=$group->{name} %> ( max <%= $group->{max_jobs} %>
                 jobs in <%= $group->{server} %> )
             </option>
@@ -57,7 +57,7 @@
               <option>--please, select--</option>
 % for my $class (@$core_job_classes) {
               <option value="<%= $class %>"
-                  <%= $job->{class} eq $class?" SELECTED=1" : '' %>
+                  <%= $job->{class}||'' eq $class?" SELECTED=1" : '' %>
                 >
                   <%= $class %>
               </option>
