@@ -280,6 +280,8 @@ sub _set_run_next {
                 cron=> $self->run_schedule
               );
       $next = $dtc->next->epoch;
+    } or do {
+      warn "Can't set the next schedule: $@";
     };
   }
 
