@@ -160,6 +160,15 @@ sub post_child_exit {
     unlink $child_log;
   }
   $cron->add_output( $child->{exit_code}, $log );
+  
+  if (my $gname = $cron->{group_name}) {
+    my ($group) = grep {
+        $_->group_name eq $gname
+      } @{ $self->{__cron_groups} };
+    if ($group) {
+      $group->runned_job();
+    }
+  }
 }
 
 sub init_child {

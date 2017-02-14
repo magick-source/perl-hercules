@@ -103,6 +103,20 @@ sub running_job {
   return;
 }
 
+sub runned_job {
+  my ($self) = @_;
+
+  my ($next_run) = Hercules::Db::Schedule
+    ->get_next_run_for_group( $self->group_name );
+  $next_run ||= time;
+
+  $self->next_run_start_epoch( $next_run );
+  $self->re_elect_epoch( $next_run + 300 );
+  $self->update;
+
+  return;
+}
+
 sub list_groups_like {
   my ($class, $search, $after) = @_;
 

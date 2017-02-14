@@ -56,9 +56,9 @@ __PACKAGE__->set_sql(runnable => q{
 });
 
 __PACKAGE__->set_sql(next_run => q{
-  SELECT min(next_run_epoch)
+  SELECT min(IF(running_until_epoch, running_until_epoch, next_run_epoch))
     FROM __TABLE__
-    WHERE next_run_epoch>UNIX_TIMESTAMP()
+    WHERE (next_run_epoch or running_until_epoch)
       AND cron_group = ?
       AND flags LIKE '%%active%%'
 });
