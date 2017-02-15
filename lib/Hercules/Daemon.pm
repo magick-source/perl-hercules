@@ -128,7 +128,7 @@ sub post_child_start {
     = $self->{_cron_running}->{ $child->{pid} }
     = delete $self->{cron};
 
-  $self->{_group_running}->{ $cron->{group_name} }++;
+  $self->{_group_running}->{ $cron->cron_group }++;
 
   return;
 }
@@ -139,7 +139,7 @@ sub post_child_exit {
   my $cron = delete $self->{_cron_running}->{ $child->{pid} };
   return unless $cron;
 
-  $self->{_group_running}->{ $cron->{group_name} }--;
+  $self->{_group_running}->{ $cron->cron_group }--;
 
   print "$$: A child Ended\n";
   my $log;
@@ -160,8 +160,8 @@ sub post_child_exit {
     unlink $child_log;
   }
   $cron->add_output( $child->{exit_code}, $log );
-  
-  if (my $gname = $cron->{group_name}) {
+
+  if (my $gname = $cron->cron_group ) {
     my ($group) = grep {
         $_->group_name eq $gname
       } @{ $self->{__cron_groups} };
