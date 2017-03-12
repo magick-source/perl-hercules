@@ -72,6 +72,7 @@
 <div class="row">
 
 <%= include 'inc/small-group-list' %>
+% if ($last_failed and @$last_failed) {
 <%= include 'inc/small-job-list',
       jobs    => $last_failed,
       class   => 'red',
@@ -79,6 +80,7 @@
       icon    => 'times',
       status  => 'failed',
 %>
+% }
 
 <%= include 'inc/small-job-list',
       jobs    => $last_runned,
