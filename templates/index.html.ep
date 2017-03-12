@@ -17,6 +17,7 @@
       link  => '/jobs/?status=active',
 %>
 
+% if (!$counters->{jobs_behind} and !$counters->{jobs_failed}) {
 <%= include 'inc/dashlet',
       title => 'Runned Jobs',
       icon => 'check', 
@@ -24,7 +25,9 @@
       value => $counters->{jobs_ok},
       link  => '/jobs/?status=ok',
 %>
+% }
 
+% if ($counters->{jobs_behind}) {
 <%= include 'inc/dashlet',
       title => 'Delayed Jobs',
       icon => 'exclamation-circle', 
@@ -32,6 +35,9 @@
       value => $counters->{jobs_behind},
       link  => '/jobs/?status=behind',
 %>
+% }
+
+% if (!$counters->{jobs_behind} or !$counters->{jobs_failed}) {
 % my $color = $counters->{max_late} > 3600
 %   ? 'red' : $counters->{max_late} > 30 ? 'yellow' : 'green';
 <%= include 'inc/dashlet',
@@ -41,8 +47,9 @@
       value => $counters->{max_late_time},
       link  => '/jobs/?status=behind',
 %>
+% }
 
-
+% if ( $counters->{jobs_failed} ) {
 <%= include 'inc/dashlet',
       title => 'Failed Jobs',
       icon => 'times', 
@@ -50,6 +57,7 @@
       value => $counters->{jobs_failed},
       link  => '/jobs/?status=failed',
 %>
+% }
 
 <%= include 'inc/dashlet',
       title => 'Job Groups',
