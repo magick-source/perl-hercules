@@ -161,8 +161,8 @@ sub get_runnable {
 
   my $sth = $class->sql_runnable(
       '*', $group_places,
-      '   AND GET_LOCK(CONCAT("runnable",id),0)
-      ORDER by next_run_epoch LIMIT 1'
+      q{   AND GET_LOCK(CONCAT('runnable',id),0)
+      ORDER by next_run_epoch LIMIT 1}
     );
 
   my ($obj) = $class->sth_to_objects( $sth, \@groups );
