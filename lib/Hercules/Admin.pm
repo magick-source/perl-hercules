@@ -18,24 +18,24 @@ sub startup {
 
   my $r = $self->routes;
 
-  $r->route('/')->to('dashboard#index');
+  $r->any('/')->to('dashboard#index');
 
   # groups
-  $r->route('/groups/')->to('groups#list');
-  $r->route('/group/:group/reelect')->to('groups#reelect');
-  $r->route('/group/:group/change')->to('groups#change');
-  $r->route('/group/new/')->to('groups#new_group');
+  $r->any('/groups/')->to('groups#list');
+  $r->any('/group/:group/reelect')->to('groups#reelect');
+  $r->any('/group/:group/change')->to('groups#change');
+  $r->any('/group/new/')->to('groups#new_group');
 
   # jobs
-  $r->route('/jobs/')->to('jobs#list');
-  $r->route('/jobs/:group')->to('jobs#list');
-  $r->route('/job/new')->to('jobs#new_job');
-  $r->route('/job/add')->to('jobs#save');
-  $r->route('/job/:job')->to('jobs#view');
-  $r->route('/job/:job/start')->to('jobs#start');
-  $r->route('/job/:job/stop')->to('jobs#stop');
-  $r->route('/job/:job/edit')->to('jobs#edit');
-  $r->route('/job/:job/save')->to('jobs#save');
+  $r->any('/jobs/')->to('jobs#list');
+  $r->any('/jobs/:group')->to('jobs#list');
+  $r->any('/job/new')->to('jobs#new_job');
+  $r->any('/job/add')->to('jobs#save');
+  $r->any('/job/:job')->to('jobs#view');
+  $r->any('/job/:job/start')->to('jobs#start');
+  $r->any('/job/:job/stop')->to('jobs#stop');
+  $r->any('/job/:job/edit')->to('jobs#edit');
+  $r->any('/job/:job/save')->to('jobs#save');
 
 }
 
